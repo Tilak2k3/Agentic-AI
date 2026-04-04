@@ -1,0 +1,32 @@
+[build-system]
+requires = ["setuptools>=61"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "agentic-ai"
+version = "0.1.0"
+description = "Input ingestion for meetings, documents, email, and SharePoint"
+readme = "README.md"
+requires-python = ">=3.10"
+dependencies = [
+  "huggingface_hub>=0.26.0",
+  "python-dotenv>=1.0.0",
+  "pypdf>=4.0.0",
+  "python-docx>=1.1.0",
+  "striprtf>=0.0.26",
+  "msal>=1.28.0",
+  "requests>=2.31.0",
+]
+
+[project.optional-dependencies]
+dev = ["pytest>=7.0"]
+
+[tool.setuptools.packages.find]
+where = ["src"]
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+pythonpath = ["src"]
+markers = [
+    "integration: hits real APIs (Hugging Face ASR, Graph, IMAP)",
+]

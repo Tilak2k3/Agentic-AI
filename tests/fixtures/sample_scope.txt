@@ -1,0 +1,4 @@
+Project Scope Baseline
+- Build CR generation flow from meeting + scope inputs.
+- Create Jira epic, stories, and tasks from CR output.
+- Produce markdown CR and JSON issue output files.

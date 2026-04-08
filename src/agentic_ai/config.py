@@ -90,3 +90,38 @@ def get_sharepoint_config() -> SharePointConfig | None:
     if not all((site, drive)):
         return None
     return SharePointConfig(site_id=site, drive_id=drive)
+
+
+@dataclass(frozen=True)
+class JiraConfig:
+    base_url: str
+    email: str
+    api_token: str
+    project_key: str
+    epic_issue_type: str
+    story_issue_type: str
+    task_issue_type: str
+    epic_link_field: str
+    verify_ssl: bool
+
+
+def get_jira_config() -> JiraConfig | None:
+    base_url = _env("JIRA_BASE_URL")
+    email = _env("JIRA_EMAIL")
+    api_token = _env("JIRA_API_TOKEN")
+    project_key = _env("JIRA_PROJECT_KEY")
+    if not all((base_url, email, api_token, project_key)):
+        return None
+    verify_raw = (_env("JIRA_VERIFY_SSL") or "true").strip().lower()
+    verify_ssl = verify_raw not in {"0", "false", "no", "off"}
+    return JiraConfig(
+        base_url=base_url.rstrip("/"),
+        email=email,
+        api_token=api_token,
+        project_key=project_key,
+        epic_issue_type=_env("JIRA_EPIC_ISSUE_TYPE") or "Epic",
+        story_issue_type=_env("JIRA_STORY_ISSUE_TYPE") or "Story",
+        task_issue_type=_env("JIRA_TASK_ISSUE_TYPE") or "Task",
+        epic_link_field=_env("JIRA_EPIC_LINK_FIELD") or "customfield_10014",
+        verify_ssl=verify_ssl,
+    )

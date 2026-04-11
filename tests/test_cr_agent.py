@@ -38,6 +38,7 @@ def test_run_cr_agent_generates_cr_file_without_jira(tmp_path: Path) -> None:
         scope_path=scope,
         output_dir=tmp_path,
         create_jira=False,
+        use_llm=False,
     )
     assert artifacts.cr_file.is_file()
     assert artifacts.jira_output_file is None

@@ -125,3 +125,61 @@ def get_jira_config() -> JiraConfig | None:
         epic_link_field=_env("JIRA_EPIC_LINK_FIELD") or "customfield_10014",
         verify_ssl=verify_ssl,
     )
+
+
+@dataclass(frozen=True)
+class LLMRouterConfig:
+    base_url: str
+    api_key: str
+    model: str
+    max_agent_steps: int
+
+
+def get_llm_router_config() -> LLMRouterConfig | None:
+    """Hugging Face OpenAI-compatible router (chat completions)."""
+    key = _env("HF_TOKEN") or _env("HUGGINGFACE_API_KEY")
+    if not key:
+        return None
+    base = (_env("LLM_BASE_URL") or "https://router.huggingface.co/v1").rstrip("/")
+    model = _env("LLM_MODEL") or "google/gemma-4-31B-it:novita"
+    try:
+        max_steps = int(_env("LLM_MAX_AGENT_STEPS") or "12")
+    except ValueError:
+        max_steps = 12
+    max_steps = max(4, min(max_steps, 24))
+    return LLMRouterConfig(base_url=base, api_key=key, model=model, max_agent_steps=max_steps)
+
+
+@dataclass(frozen=True)
+class SmartsheetConfig:
+    access_token: str
+    sheet_id: str
+    api_base: str
+    verify_ssl: bool
+    phase_column_title: str
+    start_column_title: str
+    end_column_title: str
+
+
+def get_smartsheet_config() -> SmartsheetConfig | None:
+    token = _env("SMARTSHEET_ACCESS_TOKEN")
+    sheet_id = _env("SMARTSHEET_SHEET_ID")
+    if not token or not sheet_id:
+        return None
+    base = (_env("SMARTSHEET_API_BASE") or "https://api.smartsheet.com/2.0").rstrip("/")
+    verify_raw = (_env("SMARTSHEET_VERIFY_SSL") or "true").strip().lower()
+    verify_ssl = verify_raw not in {"0", "false", "no", "off"}
+    return SmartsheetConfig(
+        access_token=token,
+        sheet_id=sheet_id.strip(),
+        api_base=base,
+        verify_ssl=verify_ssl,
+        phase_column_title=(_env("SMARTSHEET_PHASE_COLUMN_TITLE") or "Phase").strip(),
+        start_column_title=(_env("SMARTSHEET_START_COLUMN_TITLE") or "Start").strip(),
+        end_column_title=(_env("SMARTSHEET_END_COLUMN_TITLE") or "End").strip(),
+    )
+
+
+def get_api_cors_origins() -> list[str]:
+    raw = _env("CORS_ALLOW_ORIGINS") or "*"
+    return [o.strip() for o in raw.split(",") if o.strip()] or ["*"]

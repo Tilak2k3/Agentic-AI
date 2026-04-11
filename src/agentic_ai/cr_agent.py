@@ -9,9 +9,11 @@ from pathlib import Path
 
 import requests
 
-from agentic_ai.config import JiraConfig, get_jira_config
+from agentic_ai.config import JiraConfig, get_jira_config, get_llm_router_config
+from agentic_ai.cr_agent_llm import run_llm_cr_agent
 from agentic_ai.inputs.collector import load_meeting_recording, load_sow_or_scope
 from agentic_ai.jira_client import JiraClient, JiraIssue
+from agentic_ai.llm_client import OpenAIClientPort, get_openai_router_client
 
 
 @dataclass(frozen=True)
@@ -20,6 +22,7 @@ class CRArtifacts:
     cr_file: Path
     jira_output_file: Path | None
     jira_items: list[dict[str, str]]
+    llm_used: bool = False
 
 
 def _normalize_lines(text: str) -> list[str]:
@@ -200,25 +203,59 @@ def run_cr_agent(
     scope_path: str | Path,
     output_dir: str | Path = "outputs",
     create_jira: bool = True,
+    use_llm: bool = True,
+    llm_client: OpenAIClientPort | None = None,
 ) -> CRArtifacts:
     meeting_text = load_meeting_recording(meeting_path)
     scope_text = load_sow_or_scope(scope_path)
-    cr_markdown = build_cr_document(meeting_text, scope_text)
 
     out_dir = Path(output_dir)
     out_dir.mkdir(parents=True, exist_ok=True)
     cr_file = out_dir / "cr_document.md"
-    cr_file.write_text(cr_markdown, encoding="utf-8")
 
+    jira_cfg = get_jira_config() if create_jira else None
+    if create_jira and jira_cfg is None:
+        raise ValueError(
+            "Jira is not configured. Set JIRA_BASE_URL, JIRA_EMAIL, JIRA_API_TOKEN, JIRA_PROJECT_KEY."
+        )
+
+    llm_used = False
+    cr_markdown = ""
     jira_items: list[dict[str, str]] = []
-    jira_file: Path | None = None
-    if create_jira:
-        jira_cfg = get_jira_config()
-        if jira_cfg is None:
-            raise ValueError(
-                "Jira is not configured. Set JIRA_BASE_URL, JIRA_EMAIL, JIRA_API_TOKEN, JIRA_PROJECT_KEY."
+
+    router = llm_client if llm_client is not None else get_openai_router_client()
+    llm_cfg = get_llm_router_config()
+
+    if use_llm and router is not None and llm_cfg is not None:
+        try:
+            cr_markdown, jira_items = run_llm_cr_agent(
+                meeting_text=meeting_text,
+                scope_text=scope_text,
+                output_dir=out_dir,
+                create_jira=bool(create_jira and jira_cfg),
+                client=router,
+                model=llm_cfg.model,
+                max_steps=llm_cfg.max_agent_steps,
+                jira_cfg=jira_cfg if create_jira else None,
             )
-        jira_items = create_jira_items_from_cr(cr_markdown, jira_cfg)
+            llm_used = True
+            if create_jira and jira_cfg:
+                has_epic = any(item.get("type") == "Epic" for item in jira_items)
+                if not has_epic:
+                    jira_items = create_jira_items_from_cr(cr_markdown, jira_cfg)
+        except Exception:
+            llm_used = False
+            cr_markdown = ""
+            jira_items = []
+
+    if not llm_used:
+        cr_markdown = build_cr_document(meeting_text, scope_text)
+        cr_file.write_text(cr_markdown, encoding="utf-8")
+        if create_jira and jira_cfg is not None:
+            jira_items = create_jira_items_from_cr(cr_markdown, jira_cfg)
+
+    jira_file: Path | None = None
+    if create_jira and jira_cfg is not None and jira_items:
         jira_file = out_dir / "jira_items.json"
         jira_file.write_text(json.dumps(jira_items, indent=2), encoding="utf-8")
 
@@ -227,5 +264,6 @@ def run_cr_agent(
         cr_file=cr_file,
         jira_output_file=jira_file,
         jira_items=jira_items,
+        llm_used=llm_used,
     )
 

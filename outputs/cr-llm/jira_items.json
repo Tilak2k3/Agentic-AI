@@ -1,0 +1,44 @@
+[
+  {
+    "type": "Epic",
+    "key": "KAN-16",
+    "url": "https://desmond2k3.atlassian.net/browse/KAN-16",
+    "summary": "CR Automation System Implementation"
+  },
+  {
+    "type": "Story",
+    "key": "KAN-17",
+    "url": "https://desmond2k3.atlassian.net/browse/KAN-17",
+    "summary": "Develop CR Generation Logic"
+  },
+  {
+    "type": "Task",
+    "key": "KAN-18",
+    "url": "https://desmond2k3.atlassian.net/browse/KAN-18",
+    "summary": "Implement markdown template parser"
+  },
+  {
+    "type": "Story",
+    "key": "KAN-19",
+    "url": "https://desmond2k3.atlassian.net/browse/KAN-19",
+    "summary": "Implement Jira API Integration"
+  },
+  {
+    "type": "Task",
+    "key": "KAN-20",
+    "url": "https://desmond2k3.atlassian.net/browse/KAN-20",
+    "summary": "Develop Epic and Story creation endpoints"
+  },
+  {
+    "type": "Story",
+    "key": "KAN-21",
+    "url": "https://desmond2k3.atlassian.net/browse/KAN-21",
+    "summary": "Implement File Export Functionality"
+  },
+  {
+    "type": "Task",
+    "key": "KAN-22",
+    "url": "https://desmond2k3.atlassian.net/browse/KAN-22",
+    "summary": "Implement JSON export logic"
+  }
+]

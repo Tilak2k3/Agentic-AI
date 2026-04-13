@@ -32,6 +32,8 @@ Workflow:
 Rules:
 - Descriptions are plain text; the runtime converts them for Jira.
 - Summaries must be under 200 characters.
+- Grounding: only state scope baseline facts supported by the scope text; only state meeting findings supported by the transcript. If a section has no evidence, say what is unknown rather than inventing detail.
+- Before write_cr_document, mentally verify each major claim is traceable to the provided meeting or scope text.
 """
 
 

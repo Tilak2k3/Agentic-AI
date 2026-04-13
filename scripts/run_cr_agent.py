@@ -34,7 +34,8 @@ def main() -> None:
         create_jira=not args.no_jira,
         use_llm=not args.no_llm,
     )
-    print(f"CR document: {result.cr_file}")
+    print(f"CR (Markdown): {result.cr_file}")
+    print(f"CR (Word):     {result.cr_docx_file}")
     print(f"LLM agent:   {result.llm_used}")
     if result.jira_output_file:
         print(f"Jira items:  {result.jira_output_file}")

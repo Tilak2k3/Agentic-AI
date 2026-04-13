@@ -1,0 +1,25 @@
+ Look, that was supposed to be like a private, personal thing between us. Okay, Ross, Phoebe is my girlfriend, okay? We tell each other everything. Look.
+
+## Kick-off meeting notes
+
+Project Kickoff Meeting Notes
+Date: 10 April 2026
+Project: User Authentication & Dashboard System
+Attendees: Client, Project Manager, Backend Developer, Frontend Developer
+Objectives:
+- Understand project scope and requirements
+- Define timeline and deliverables
+Key Discussions:
+- Client requires login functionality with email and Google authentication.
+- Dashboard to track user activity and analytics.
+- Estimated timeline is 2 weeks.
+Action Items:
+- Backend team to design API (3 days).
+- Frontend team to design UI (2 days).
+- Client to provide API keys by tomorrow.
+Risks:
+- Delay in third-party API integration.
+Assumptions:
+- Client will provide necessary credentials on time.
+Dependencies:
+- Google authentication API integration.

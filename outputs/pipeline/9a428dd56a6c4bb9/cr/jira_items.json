@@ -1,0 +1,32 @@
+[
+  {
+    "type": "Epic",
+    "key": "KAN-30",
+    "url": "https://desmond2k3.atlassian.net/browse/KAN-30",
+    "summary": "User Authentication & Dashboard System Implementation"
+  },
+  {
+    "type": "Story",
+    "key": "KAN-31",
+    "url": "https://desmond2k3.atlassian.net/browse/KAN-31",
+    "summary": "Implement User Authentication"
+  },
+  {
+    "type": "Task",
+    "key": "KAN-32",
+    "url": "https://desmond2k3.atlassian.net/browse/KAN-32",
+    "summary": "Design Backend API for Authentication"
+  },
+  {
+    "type": "Story",
+    "key": "KAN-33",
+    "url": "https://desmond2k3.atlassian.net/browse/KAN-33",
+    "summary": "Develop User Dashboard"
+  },
+  {
+    "type": "Task",
+    "key": "KAN-34",
+    "url": "https://desmond2k3.atlassian.net/browse/KAN-34",
+    "summary": "Design Dashboard UI"
+  }
+]

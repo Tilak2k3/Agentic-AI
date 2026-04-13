@@ -41,5 +41,6 @@ def test_run_cr_agent_generates_cr_file_without_jira(tmp_path: Path) -> None:
         use_llm=False,
     )
     assert artifacts.cr_file.is_file()
+    assert artifacts.cr_docx_file.is_file()
     assert artifacts.jira_output_file is None
     assert "Change Request" in artifacts.cr_markdown

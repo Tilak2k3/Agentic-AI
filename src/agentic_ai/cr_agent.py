@@ -11,6 +11,7 @@ import requests
 
 from agentic_ai.config import JiraConfig, get_jira_config, get_llm_router_config
 from agentic_ai.cr_agent_llm import run_llm_cr_agent
+from agentic_ai.export_docx import write_markdown_as_docx
 from agentic_ai.inputs.collector import load_meeting_recording, load_sow_or_scope
 from agentic_ai.jira_client import JiraClient, JiraIssue
 from agentic_ai.llm_client import OpenAIClientPort, get_openai_router_client
@@ -20,6 +21,7 @@ from agentic_ai.llm_client import OpenAIClientPort, get_openai_router_client
 class CRArtifacts:
     cr_markdown: str
     cr_file: Path
+    cr_docx_file: Path
     jira_output_file: Path | None
     jira_items: list[dict[str, str]]
     llm_used: bool = False
@@ -212,6 +214,7 @@ def run_cr_agent(
     out_dir = Path(output_dir)
     out_dir.mkdir(parents=True, exist_ok=True)
     cr_file = out_dir / "cr_document.md"
+    cr_docx_file = out_dir / "cr_document.docx"
 
     jira_cfg = get_jira_config() if create_jira else None
     if create_jira and jira_cfg is None:
@@ -226,33 +229,37 @@ def run_cr_agent(
     router = llm_client if llm_client is not None else get_openai_router_client()
     llm_cfg = get_llm_router_config()
 
-    if use_llm and router is not None and llm_cfg is not None:
-        try:
-            cr_markdown, jira_items = run_llm_cr_agent(
-                meeting_text=meeting_text,
-                scope_text=scope_text,
-                output_dir=out_dir,
-                create_jira=bool(create_jira and jira_cfg),
-                client=router,
-                model=llm_cfg.model,
-                max_steps=llm_cfg.max_agent_steps,
-                jira_cfg=jira_cfg if create_jira else None,
+    if use_llm:
+        if router is None or llm_cfg is None:
+            raise ValueError(
+                "CR agent requires LLM credentials: set HF_TOKEN or HUGGINGFACE_API_KEY "
+                "and LLM_BASE_URL / LLM_MODEL (see .env.example)."
             )
-            llm_used = True
-            if create_jira and jira_cfg:
-                has_epic = any(item.get("type") == "Epic" for item in jira_items)
-                if not has_epic:
-                    jira_items = create_jira_items_from_cr(cr_markdown, jira_cfg)
-        except Exception:
-            llm_used = False
-            cr_markdown = ""
-            jira_items = []
-
-    if not llm_used:
+        cr_markdown, jira_items = run_llm_cr_agent(
+            meeting_text=meeting_text,
+            scope_text=scope_text,
+            output_dir=out_dir,
+            create_jira=bool(create_jira and jira_cfg),
+            client=router,
+            model=llm_cfg.model,
+            max_steps=llm_cfg.max_agent_steps,
+            jira_cfg=jira_cfg if create_jira else None,
+        )
+        llm_used = True
+        if create_jira and jira_cfg:
+            has_epic = any(item.get("type") == "Epic" for item in jira_items)
+            if not has_epic:
+                jira_items = create_jira_items_from_cr(cr_markdown, jira_cfg)
+    else:
         cr_markdown = build_cr_document(meeting_text, scope_text)
-        cr_file.write_text(cr_markdown, encoding="utf-8")
         if create_jira and jira_cfg is not None:
             jira_items = create_jira_items_from_cr(cr_markdown, jira_cfg)
+
+    if not (cr_markdown or "").strip():
+        raise RuntimeError("CR agent produced an empty document.")
+
+    cr_file.write_text(cr_markdown, encoding="utf-8")
+    write_markdown_as_docx(cr_markdown, cr_docx_file)
 
     jira_file: Path | None = None
     if create_jira and jira_cfg is not None and jira_items:
@@ -262,6 +269,7 @@ def run_cr_agent(
     return CRArtifacts(
         cr_markdown=cr_markdown,
         cr_file=cr_file,
+        cr_docx_file=cr_docx_file,
         jira_output_file=jira_file,
         jira_items=jira_items,
         llm_used=llm_used,

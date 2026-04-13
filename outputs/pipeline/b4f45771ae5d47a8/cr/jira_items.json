@@ -1,0 +1,44 @@
+[
+  {
+    "type": "Epic",
+    "key": "KAN-35",
+    "url": "https://desmond2k3.atlassian.net/browse/KAN-35",
+    "summary": "User Authentication & Dashboard System Implementation"
+  },
+  {
+    "type": "Story",
+    "key": "KAN-36",
+    "url": "https://desmond2k3.atlassian.net/browse/KAN-36",
+    "summary": "Implement User Authentication"
+  },
+  {
+    "type": "Task",
+    "key": "KAN-37",
+    "url": "https://desmond2k3.atlassian.net/browse/KAN-37",
+    "summary": "Design Backend Authentication APIs"
+  },
+  {
+    "type": "Task",
+    "key": "KAN-38",
+    "url": "https://desmond2k3.atlassian.net/browse/KAN-38",
+    "summary": "Integrate Google OAuth API"
+  },
+  {
+    "type": "Story",
+    "key": "KAN-39",
+    "url": "https://desmond2k3.atlassian.net/browse/KAN-39",
+    "summary": "Develop User Activity Dashboard"
+  },
+  {
+    "type": "Task",
+    "key": "KAN-40",
+    "url": "https://desmond2k3.atlassian.net/browse/KAN-40",
+    "summary": "Design Dashboard UI"
+  },
+  {
+    "type": "Task",
+    "key": "KAN-41",
+    "url": "https://desmond2k3.atlassian.net/browse/KAN-41",
+    "summary": "Implement Analytics Tracking Logic"
+  }
+]

@@ -1,0 +1,88 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Agentic AI — Delivery Agents</title>
+    <link rel="stylesheet" href="/static/styles.css" />
+  </head>
+  <body>
+    <header class="hero">
+      <h1>Agentic AI</h1>
+      <p class="tagline">
+        Upload a <strong>meeting recording</strong> and/or a <strong>SOW/scope</strong> document (plus optional
+        kick-off notes). Agents run only when the inputs support them: scope is required for CR and Plan;
+        RAID runs from whatever you provide. Downloads use <strong>Word (.docx)</strong> for the CR and
+        <strong>Excel (.xlsx)</strong> for RAID.
+      </p>
+    </header>
+
+    <main class="layout">
+      <section class="card">
+        <h2>Inputs</h2>
+        <form id="pipelineForm" class="form">
+          <label class="field">
+            <span class="label">Meeting recording</span>
+            <input type="file" id="meeting" name="meeting" accept="audio/*,.txt,.md,.log" />
+            <small>Audio (e.g. mp3, wav) or text notes — optional if scope is provided</small>
+          </label>
+          <label class="field">
+            <span class="label">SOW / scope document</span>
+            <input type="file" id="scope" name="scope" accept=".txt,.md,.pdf,.docx,.html,.htm,.rtf,.odt" />
+            <small>Optional if you only want RAID from a meeting; required for CR and Plan</small>
+          </label>
+          <label class="field">
+            <span class="label">Kick-off meeting notes <em>(optional)</em></span>
+            <input type="file" id="kickoff" name="kickoff" accept=".txt,.md,.pdf,.docx,.html,.htm,.rtf,.odt" />
+          </label>
+
+          <fieldset class="options">
+            <legend>Options</legend>
+            <label class="check"><input type="checkbox" id="useLlm" checked /> Use LLM (requires HF token in server .env)</label>
+            <label class="check"><input type="checkbox" id="createJira" checked /> Create Jira items (CR)</label>
+            <label class="check"><input type="checkbox" id="syncSmartsheet" /> Sync plan to Smartsheet</label>
+          </fieldset>
+
+          <button type="submit" class="btn primary" id="submitBtn">Run pipeline</button>
+        </form>
+      </section>
+
+      <section class="card">
+        <h2>Live progress</h2>
+        <div id="liveLog" class="live-log" aria-live="polite"></div>
+      </section>
+
+      <section class="card hidden" id="resultsSection">
+        <h2>Outputs</h2>
+        <p id="resultSummary" class="muted"></p>
+
+        <div class="actions" id="actionButtons">
+          <a class="btn secondary hidden" id="btnDownloadCr" href="#" download="cr_document.docx">Download CR (Word)</a>
+          <a class="btn secondary hidden" id="btnDownloadPlan" href="#" download>Download plan</a>
+          <button type="button" class="btn secondary" id="btnJira">View Jira</button>
+          <button type="button" class="btn secondary" id="btnSmartsheet">View Smartsheet</button>
+          <a class="btn secondary hidden" id="btnDownloadRaid" href="#" download="raid_log.xlsx">Download RAID (Excel)</a>
+        </div>
+
+        <details class="details-block">
+          <summary>CR document (preview)</summary>
+          <pre id="crPreview" class="preview"></pre>
+        </details>
+        <details class="details-block">
+          <summary>Project plan (preview)</summary>
+          <pre id="planPreview" class="preview"></pre>
+        </details>
+        <details class="details-block">
+          <summary>RAID summary (preview)</summary>
+          <pre id="raidPreview" class="preview"></pre>
+        </details>
+      </section>
+    </main>
+
+    <footer class="footer">
+      <span>API docs: <a href="/docs">/docs</a></span>
+    </footer>
+
+    <script src="/static/app.js"></script>
+  </body>
+</html>

@@ -125,3 +125,4 @@ def test_run_cr_agent_prefers_llm_when_client_injected(tmp_path: Path) -> None:
     )
     assert art.llm_used is True
     assert "Injected" in art.cr_markdown
+    assert art.cr_docx_file.is_file()

@@ -58,5 +58,33 @@ def test_cr_run_with_text_no_jira() -> None:
     assert r.status_code == 200, r.text
     data = r.json()
     assert "cr_markdown" in data
+    assert data.get("cr_docx_file", "").endswith(".docx")
     assert data["jira_file"] is None
     assert data["llm_used"] is False
+
+
+def test_raid_generate_with_use_llm_false() -> None:
+    r = client.post(
+        "/api/v1/raid/generate",
+        json={
+            "meeting_text": "Risks discussed in kickoff.",
+            "scope_text": "Dependencies on vendor API.",
+            "use_llm": False,
+        },
+    )
+    assert r.status_code == 200, r.text
+    data = r.json()
+    assert data["llm_used"] is False
+    assert data["excel_file"]
+
+
+def test_inputs_extract_document_txt() -> None:
+    r = client.post(
+        "/api/v1/inputs/extract",
+        data={"kind": "document"},
+        files={"file": ("note.txt", b"Hello scope line", "text/plain")},
+    )
+    assert r.status_code == 200, r.text
+    data = r.json()
+    assert data["kind"] == "document"
+    assert "Hello scope" in data["text"]

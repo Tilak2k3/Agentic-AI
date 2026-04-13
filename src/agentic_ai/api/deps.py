@@ -9,9 +9,9 @@ from fastapi import HTTPException
 
 from typing import Union
 
-from agentic_ai.api.schemas import CRRunBody, PlanGenerateBody
+from agentic_ai.api.schemas import CRRunBody, PlanGenerateBody, RaidGenerateBody
 
-_MeetingScopeBody = Union[PlanGenerateBody, CRRunBody]
+_MeetingScopeBody = Union[PlanGenerateBody, CRRunBody, RaidGenerateBody]
 
 
 def materialize_meeting_scope_paths(body: _MeetingScopeBody, base_out: Path) -> tuple[Path, Path, Path]:

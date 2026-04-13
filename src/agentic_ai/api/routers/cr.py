@@ -35,6 +35,7 @@ def run_cr(body: CRRunBody) -> CRRunResponse:
     return CRRunResponse(
         cr_markdown=art.cr_markdown,
         cr_file=str(art.cr_file.resolve()),
+        cr_docx_file=str(art.cr_docx_file.resolve()),
         jira_file=str(art.jira_output_file.resolve()) if art.jira_output_file else None,
         jira_items=art.jira_items,
         llm_used=art.llm_used,

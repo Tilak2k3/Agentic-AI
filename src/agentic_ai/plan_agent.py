@@ -118,35 +118,34 @@ def derive_plan_line_items(plan_markdown: str) -> list[PlanLineItem]:
 
 
 def _try_llm_plan(client: OpenAIClientPort, model: str, meeting_text: str, scope_text: str) -> str | None:
-    try:
-        resp = client.chat.completions.create(
-            model=model,
-            temperature=0.25,
-            messages=[
-                {
-                    "role": "system",
-                    "content": (
-                        "You are a project planning assistant. Output ONLY valid Markdown for a project plan. "
-                        "Include sections: Objectives, Scope summary, Meeting priorities, Phases, "
-                        "and a markdown table named exactly '## 5. Work breakdown (line items)' with columns "
-                        "| Phase | Task | Start | End | and at least 4 data rows. No code fences."
-                    ),
-                },
-                {
-                    "role": "user",
-                    "content": (
-                        "Meeting notes / transcript:\n"
-                        f"{meeting_text[:25000]}\n\n"
-                        "Scope / SOW:\n"
-                        f"{scope_text[:25000]}"
-                    ),
-                },
-            ],
-        )
-        raw = (resp.choices[0].message.content or "").strip()
-        return raw if raw else None
-    except Exception:
-        return None
+    resp = client.chat.completions.create(
+        model=model,
+        temperature=0.25,
+        messages=[
+            {
+                "role": "system",
+                "content": (
+                    "You are a project planning assistant. Output ONLY valid Markdown for a project plan. "
+                    "Include sections: Objectives, Scope summary, Meeting priorities, Phases, "
+                    "and a markdown table named exactly '## 5. Work breakdown (line items)' with columns "
+                    "| Phase | Task | Start | End | and at least 4 data rows. No code fences. "
+                    "Align tasks and priorities with the supplied meeting and scope text; flag gaps explicitly "
+                    "instead of fabricating requirements."
+                ),
+            },
+            {
+                "role": "user",
+                "content": (
+                    "Meeting notes / transcript:\n"
+                    f"{meeting_text[:25000]}\n\n"
+                    "Scope / SOW:\n"
+                    f"{scope_text[:25000]}"
+                ),
+            },
+        ],
+    )
+    raw = (resp.choices[0].message.content or "").strip()
+    return raw if raw else None
 
 
 def run_plan_agent(
@@ -176,13 +175,18 @@ def run_plan_agent(
     plan_md = ""
     router = llm_client if llm_client is not None else get_openai_router_client()
     llm_cfg = get_llm_router_config()
-    if use_llm and router is not None and llm_cfg is not None:
+    if use_llm:
+        if router is None or llm_cfg is None:
+            raise ValueError(
+                "Plan agent requires LLM credentials: set HF_TOKEN or HUGGINGFACE_API_KEY "
+                "and LLM_BASE_URL / LLM_MODEL (see .env.example)."
+            )
         plan_try = _try_llm_plan(router, llm_cfg.model, m, s)
-        if plan_try:
-            plan_md = plan_try.strip()
-            llm_used = True
-
-    if not plan_md:
+        if not plan_try or not str(plan_try).strip():
+            raise RuntimeError("LLM returned an empty project plan; check model availability and quotas.")
+        plan_md = str(plan_try).strip()
+        llm_used = True
+    else:
         plan_md = build_project_plan(m, s)
 
     plan_file.write_text(plan_md, encoding="utf-8")
